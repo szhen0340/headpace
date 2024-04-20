@@ -1,12 +1,89 @@
 [
   {
-    "name": "dayname",
+    "name": "Wednesday",
     "events": [
       {
-        "name": "eventname",
-        "description": "description",
-        "startTime": 0,
-        "endTime": 900
+        "name": "Morning Review",
+        "description": "Review tasks for the day and check new emails",
+        "startTime": 900,
+        "endTime": 930
+      },
+      {
+        "name": "Development Work",
+        "description": "Work on the current sprint tasks, focusing on backend integration",
+        "startTime": 930,
+        "endTime": 1200
+      },
+      {
+        "name": "Team Meeting",
+        "description": "Weekly team meeting to discuss project updates and blockers",
+        "startTime": 1300,
+        "endTime": 1400
+      },
+      {
+        "name": "Code Review",
+        "description": "Review code submissions from peers and provide feedback",
+        "startTime": 1530,
+        "endTime": 1630
+      },
+      {
+        "name": "Continue Development",
+        "description": "Continue working on assigned development tasks",
+        "startTime": 1630,
+        "endTime": 1800
+      },
+      {
+        "name": "Wrap-up and Planning",
+        "description": "Summarize the day's work and plan tasks for the next day",
+        "startTime": 1800,
+        "endTime": 1900
+      },
+      {
+        "name": "Personal Study Time",
+        "description": "Study new technologies or work on personal projects",
+        "startTime": 1900,
+        "endTime": 2100
+      }
+    ]
+  },
+  {
+    "name": "Saturday",
+    "events": [
+      {
+        "name": "Breakfast and Coffee",
+        "description": "Take time to make breakfast and enjoy a cup of coffee",
+        "startTime": 1000,
+        "endTime": 1100
+      },
+      {
+        "name": "Gym Time",
+        "description": "Visit the gym for a workout session",
+        "startTime": 1100,
+        "endTime": 1230
+      },
+      {
+        "name": "Lunch with Friends",
+        "description": "Meet friends for a relaxing lunch",
+        "startTime": 1400,
+        "endTime": 1530
+      },
+      {
+        "name": "Park Visit",
+        "description": "Visit a local park, maybe enjoy some reading",
+        "startTime": 1600,
+        "endTime": 1730
+      },
+      {
+        "name": "Dinner Preparation",
+        "description": "Prepare and enjoy a homemade dinner",
+        "startTime": 1800,
+        "endTime": 1900
+      },
+      {
+        "name": "Movie Night",
+        "description": "Watch a new or favorite movie at home",
+        "startTime": 1930,
+        "endTime": 2130
       }
     ]
   }

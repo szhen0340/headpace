@@ -13,7 +13,7 @@ function militaryToMinutes(military: number) {
 }
 
 // duration: minutes
-export function findOpenSlots(duration: number) {
+export function findOpenSlots(duration: number, daySpecify: string | null) {
   let openTimes: TimeSlot[] = [];
   const wakeUpTime = 900;
   const bedTime = 2200;
@@ -41,6 +41,9 @@ export function findOpenSlots(duration: number) {
     // look at gaps between events, add timeSlot to openTimes if >= duration
     let lastEvent: number | null = null;
     day.events.forEach((event: CalendarEvent) => {
+      if (daySpecify !== null && daySpecify !== day.name) {
+        return;
+      }
       if (lastEvent) {
         if (
           militaryToMinutes(event.startTime) - militaryToMinutes(lastEvent) >=
@@ -61,7 +64,7 @@ export function findOpenSlots(duration: number) {
 }
 
 export function checkConflict(time: TimeSlot) {
-  let ok = true;
+  let hasConflict = false;
 
   data.forEach((day: Day) => {
     if (day.name === time.date) {
@@ -72,11 +75,11 @@ export function checkConflict(time: TimeSlot) {
             time.startTime < event.endTime) ||
           (time.endTime > event.startTime && time.endTime <= event.endTime)
         ) {
-          ok = false;
+          hasConflict = true;
         }
       });
     }
   });
 
-  return ok;
+  return hasConflict;
 }
