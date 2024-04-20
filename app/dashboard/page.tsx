@@ -122,19 +122,22 @@ export default function Home() {
 
   const newTime = (dateObject: Date, time: number, day: string) => {
     let dateObj = new Date(dateObject);
+
     dateObj.setMinutes(time % 100);
     dateObj.setHours(Math.floor(time / 100));
-    dateObj.setMonth(parseInt(day.split('/')[0]));
+    dateObj.setMonth(parseInt(day.split('/')[0]) - 1);
     dateObj.setDate(parseInt(day.split('/')[1]));
+
     return dateObj;
   };
 
   const formatCountdownString = (timeDiff: number) => {
     const seconds = timeDiff / 1000;
-    const hours = Math.floor(seconds / 3600);
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
 
-    return `${hours}H ${minutes}M`;
+    return `${days}D ${hours}H ${minutes}M`;
   };
 
   const [time, setTime] = useState(new Date());
@@ -174,18 +177,14 @@ export default function Home() {
                 <>
                   {
                     role === "user" ?
-                      <div className="text-sm flex items-centerf">
+                      <div className="text-sm flex items-center gap-2 my-4">
                         <Avatar>
-                          <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                          <AvatarImage src="https://github.com/szhen0340.png" alt="User" />
                           <AvatarFallback>User</AvatarFallback>
                         </Avatar>
                         <span>{content}</span>
                       </div> :
-                      <div className="text-sm flex items-center justify-center">
-                        <Avatar>
-                          <AvatarImage src="https://github.com/shadcn.png" alt="AI" />
-                          <AvatarFallback>AI</AvatarFallback>
-                        </Avatar>
+                      <div className="text-sm flex items-center gap-2 my-4">
                         <Typewriter
                           options={{
                             delay: 10
@@ -195,6 +194,10 @@ export default function Home() {
                               .start();
                           }}
                         />
+                        <Avatar>
+                          <AvatarImage src="https://github.com/snowballsh.png" alt="AI" />
+                          <AvatarFallback>AI</AvatarFallback>
+                        </Avatar>
                       </div>
 
                   }
@@ -219,8 +222,13 @@ export default function Home() {
                     </FormControl>
                   </FormItem>
                 )} />
+
+
+              <Mic size={18} />
               <div className="flex justify-end w-full rounded-lg rounded-t-none p-2 gap-2 bg-white">
-                <Mic size={18} /> <ArrowBigRight size={18} />
+                <Button type="submit" variant="ghost" className="size-6 p-0 m-0">
+                  <ArrowBigRight size={18} />
+                </Button>
               </div>
             </form>
           </Form>
@@ -238,12 +246,19 @@ export default function Home() {
             {searchResults.map((event: CalendarEvent) => {
               let currentTime = (time.getTime());
               let eventDay = event.name.split("-=-")[1];
+              // parse eventDay from mm/dd/yyyy to Date object
+              const eventDateObj = new Date();
+              eventDateObj.setFullYear(parseInt(eventDay.split('/')[2]));
+              eventDateObj.setMonth(parseInt(eventDay.split('/')[0]) - 1);
+              eventDateObj.setDate(parseInt(eventDay.split('/')[1]));
+              // get day diff from today
+              const dayDiff = Math.floor((eventDateObj.getTime() - currentTime) / (1000 * 3600 * 24));
               let nextTime = newTime(time, event.startTime, eventDay);
               let countdownString = formatCountdownString(nextTime.getTime() - currentTime);
               return (
                 <div
                   className={cn(
-                    "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
+                    "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent" + (dayDiff % 2 == 0 ? " bg-slate-100" : "")
                   )}
                 >
                   <div className="flex w-full flex-col gap-1">

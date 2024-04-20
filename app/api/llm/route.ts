@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
   }
 
   const runner = client.beta.chat.completions.runTools({
-    //model: "gpt-4-turbo-preview",
-    model: "gpt-3.5-turbo",
+    model: "gpt-4-turbo-preview",
+    //model: "gpt-3.5-turbo",
     messages: [
       {
         role: "system",

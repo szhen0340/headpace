@@ -1,6 +1,5 @@
 "use client";
 
-import ChatBox from "@/components/llm-stream";
 import { Input } from "@/components/ui/input";
 import { ArrowBigRight, Mic } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,8 @@ import { useState, useEffect } from "react";
 
 import data from "@/data.json";
 import Fuse from "fuse.js";
+import Typewriter from "typewriter-effect";
+import { loadFirebase } from "@/lib/load-firestore";
 
 const FormSchema = z.object({
   input: z.string(),
@@ -29,26 +31,57 @@ export default function Home() {
     },
   });
 
+  const [chatHistory, setChatHistory] = useState<{ role: string, content: string; }[]>([]);
+
+  useEffect(() => { }, [chatHistory]);
+
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    form.reset();
     const prompt = data.input;
+
+    chatHistory.push({
+      role: "user",
+      content: data.input,
+    });
     //console.log(prompt);
     const res = await fetch("/api/llm", {
       method: "POST",
       body: JSON.stringify(
         {
+          history: chatHistory,
           prompt: prompt,
         }
       ),
     });
-    const text = res.json();
-    toast({
-      title: "Assistant Response:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{text}</code>
-        </pre>
+    const text = (await res.json()).toString();
+    chatHistory.push({
+      role: "assistant",
+      content: text,
+    });
+
+    // toast({
+    //   title: "Assistant Response:",
+    //   description: (
+    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{text}</code>
+    //     </pre>
+    //   ),
+    // });
+
+    const audioRes = await fetch("/api/tts", {
+      method: "POST",
+      body: JSON.stringify(
+        {
+          text: text.toString(),
+        }
       ),
     });
+
+    const buffer = Buffer.from(await audioRes.arrayBuffer());
+    const blob = new Blob([buffer], { type: "audio/mp3" });
+    const audioURL = URL.createObjectURL(blob);
+    const audio = new Audio(audioURL);
+    audio.play();
   }
 
   let eventsList: CalendarEvent[] = [];
@@ -88,20 +121,24 @@ export default function Home() {
     setSearchResults(items);
   };
 
-  const newTime = (dateObject: Date, time: number) => {
+  const newTime = (dateObject: Date, time: number, day: string) => {
     let dateObj = new Date(dateObject);
+
     dateObj.setMinutes(time % 100);
     dateObj.setHours(Math.floor(time / 100));
+    dateObj.setMonth(parseInt(day.split('/')[0]) - 1);
+    dateObj.setDate(parseInt(day.split('/')[1]));
 
     return dateObj;
   };
 
   const formatCountdownString = (timeDiff: number) => {
     const seconds = timeDiff / 1000;
-    const hours = Math.floor(seconds / 3600);
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
 
-    return `${hours}H ${minutes}M`;
+    return `${days}D ${hours}H ${minutes}M`;
   };
 
   const [time, setTime] = useState(new Date());
@@ -110,13 +147,71 @@ export default function Home() {
       setTime(new Date());
     }, 1000);
 
+    const setData = async () => {
+      await loadFirebase();
+    };
+
+    setData();
+
     return () => clearInterval(interval);
   }, []);
 
+  const militaryTo12 = (time: number) => {
+    let string = '';
+    if (time % 100 < 10) {
+      string = `${Math.floor(time / 100) - 12 * +(Math.floor(time / 100) > 12)}:0${time % 100}`;
+    } else {
+      string = `${Math.floor(time / 100) - 12 * +(Math.floor(time / 100) > 12)}:${time % 100}`;
+    }
+
+    if (Math.floor(time / 100) >= 12) {
+      string += " PM";
+    } else {
+      string += " AM";
+    }
+
+    return string;
+  };
+
   return (
     <main className="flex min-h-screen max-h-screen max-w-screen">
-      <div className="h-screen w-[50vw] bg-primary">
-        <div className="w-[] pb-4 pt-2">
+      <div className="h-screen w-[50vw] bg-primary flex flex-col items-center">
+        <div className="w-[30vw] pb-4 pt-2">
+          <ScrollArea id="chat" className="w-[30vw] h-[80vh] bg-white rounded-lg my-4 p-4">
+            {chatHistory.map((datapoint, index) => {
+              const { role, content } = datapoint;
+              return (
+                <>
+                  {
+                    role === "user" ?
+                      <div className="text-sm flex items-center gap-2 my-4">
+                        <Avatar>
+                          <AvatarImage src="https://github.com/szhen0340.png" alt="User" />
+                          <AvatarFallback>User</AvatarFallback>
+                        </Avatar>
+                        <span>{content}</span>
+                      </div> :
+                      <div className="text-sm flex items-center gap-2 my-4">
+                        <Typewriter
+                          options={{
+                            delay: 10
+                          }}
+                          onInit={(typewriter) => {
+                            typewriter.typeString(content)
+                              .start();
+                          }}
+                        />
+                        <Avatar>
+                          <AvatarImage src="https://github.com/snowballsh.png" alt="AI" />
+                          <AvatarFallback>AI</AvatarFallback>
+                        </Avatar>
+                      </div>
+
+                  }
+                </>
+              );
+            })}
+          </ScrollArea>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
@@ -128,15 +223,17 @@ export default function Home() {
                       <Input
                         autoComplete="off"
                         placeholder="Ask your AI assistant about your calendar."
-                        className="resize-none border-primary border-2 border-b-0 rounded-lg rounded-b-none"
+                        className="resize-none bg-white rounded-lg rounded-b-none"
                         {...field}
                       />
                     </FormControl>
                   </FormItem>
-                )}
-              />
-              <div className="flex justify-end w-full border-2 border-primary border-t-0 rounded-lg rounded-t-none p-2 gap-2">
-                <Mic size={18} /> <ArrowBigRight size={18} />
+                )} />
+
+              <div className="flex justify-end w-full rounded-lg rounded-t-none p-2 gap-2 bg-white">
+                <Button type="submit" variant="ghost" className="size-6 p-0 m-0">
+                  <Mic size={18} />
+                </Button>
               </div>
             </form>
           </Form>
@@ -153,12 +250,20 @@ export default function Home() {
           <div className="flex flex-col gap-2 p-4 pt-0">
             {searchResults.map((event: CalendarEvent) => {
               let currentTime = (time.getTime());
-              let nextTime = newTime(time, event.startTime);
+              let eventDay = event.name.split("-=-")[1];
+              // parse eventDay from mm/dd/yyyy to Date object
+              const eventDateObj = new Date();
+              eventDateObj.setFullYear(parseInt(eventDay.split('/')[2]));
+              eventDateObj.setMonth(parseInt(eventDay.split('/')[0]) - 1);
+              eventDateObj.setDate(parseInt(eventDay.split('/')[1]));
+              // get day diff from today
+              const dayDiff = Math.floor((eventDateObj.getTime() - currentTime) / (1000 * 3600 * 24));
+              let nextTime = newTime(time, event.startTime, eventDay);
               let countdownString = formatCountdownString(nextTime.getTime() - currentTime);
               return (
                 <div
                   className={cn(
-                    "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
+                    "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent" + (dayDiff % 2 == 0 ? " bg-slate-100" : "")
                   )}
                 >
                   <div className="flex w-full flex-col gap-1">
@@ -167,7 +272,7 @@ export default function Home() {
                       <span>{countdownString}</span>
                     </div>
                     <div className="text-xs font-medium">
-                      {event.name.split("-=-")[1] + ": " + event.startTime + " - " + event.endTime}
+                      {event.name.split("-=-")[1] + ": " + militaryTo12(event.startTime) + " - " + militaryTo12(event.endTime)}
                     </div>
                   </div>
                   <div className="line-clamp-2 text-xs text-muted-foreground">
@@ -184,6 +289,6 @@ export default function Home() {
       {/*
           <ChatBox />
           */}
-    </main>
+    </main >
   );
-}
+};;

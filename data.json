@@ -86,5 +86,104 @@
         "endTime": 2130
       }
     ]
+  },
+  {
+    "name": "04/23/2024",
+    "events": [
+      {
+        "name": "Early Morning Jog",
+        "description": "Start the day with a refreshing jog",
+        "startTime": 900,
+        "endTime": 930
+      },
+      {
+        "name": "Focused Development Time",
+        "description": "Dedicated time for coding and debugging",
+        "startTime": 940,
+        "endTime": 1130
+      },
+      {
+        "name": "Client Call",
+        "description": "Conference call with a client to discuss project requirements",
+        "startTime": 1140,
+        "endTime": 1230
+      },
+      {
+        "name": "Webinar",
+        "description": "Attend an online webinar on new technology trends",
+        "startTime": 1500,
+        "endTime": 1630
+      },
+      {
+        "name": "Dinner",
+        "description": "Early dinner",
+        "startTime": 1700,
+        "endTime": 1730
+      },
+      {
+        "name": "Evening Course",
+        "description": "Online course on advanced software architecture",
+        "startTime": 1800,
+        "endTime": 1930
+      }
+    ]
+  },
+  {
+    "name": "04/24/2024",
+    "events": [
+      {
+        "name": "Team Standup",
+        "description": "Daily morning standup meeting with the team",
+        "startTime": 900,
+        "endTime": 930
+      },
+      {
+        "name": "Continue Sprint Work",
+        "description": "Work on sprint tasks, focus on front-end development",
+        "startTime": 940,
+        "endTime": 1200
+      },
+      {
+        "name": "Afternoon at the Coffee Shop",
+        "description": "Relax at a local coffee shop, read or work on personal projects",
+        "startTime": 1530,
+        "endTime": 1700
+      },
+      {
+        "name": "Casual Dinner Out",
+        "description": "Dinner out to kick off the weekend",
+        "startTime": 1800,
+        "endTime": 1900
+      },
+      {
+        "name": "Live Music Event",
+        "description": "Attend a live music event nearby",
+        "startTime": 2000,
+        "endTime": 2200
+      }
+    ]
+  },
+  {
+    "name": "04/25/2024",
+    "events": [
+      {
+        "name": "Brunch",
+        "description": "Enjoy a late brunch at home or at a cafe",
+        "startTime": 1000,
+        "endTime": 1130
+      },
+      {
+        "name": "Outdoor Hike",
+        "description": "Go for a hike in a nearby nature reserve",
+        "startTime": 1200,
+        "endTime": 1500
+      },
+      {
+        "name": "Family Dinner",
+        "description": "Cook and enjoy a dinner with family",
+        "startTime": 1830,
+        "endTime": 2000
+      }
+    ]
   }
 ]
