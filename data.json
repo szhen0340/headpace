@@ -1,0 +1,13 @@
+[
+  {
+    "name": "dayname",
+    "events": [
+      {
+        "name": "eventname",
+        "description": "description",
+        "startTime": 0,
+        "endTime": 900
+      }
+    ]
+  }
+]
