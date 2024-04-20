@@ -1,6 +1,5 @@
 "use client";
 
-import ChatBox from "@/components/llm-stream";
 import { Input } from "@/components/ui/input";
 import { ArrowBigRight, Mic } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,14 +7,16 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import data from "@/data.json";
 import Fuse from "fuse.js";
+import Typewriter from "typewriter-effect";
 
 const FormSchema = z.object({
   input: z.string(),
@@ -29,15 +30,57 @@ export default function Home() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
+  const [chatHistory, setChatHistory] = useState<{ role: string, content: string; }[]>([]);
+
+  useEffect(() => { }, [chatHistory]);
+
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    form.reset();
+    const prompt = data.input;
+
+    chatHistory.push({
+      role: "user",
+      content: data.input,
+    });
+    //console.log(prompt);
+    const res = await fetch("/api/llm", {
+      method: "POST",
+      body: JSON.stringify(
+        {
+          history: chatHistory,
+          prompt: prompt,
+        }
       ),
     });
+    const text = (await res.json()).toString();
+    chatHistory.push({
+      role: "assistant",
+      content: text,
+    });
+
+    // toast({
+    //   title: "Assistant Response:",
+    //   description: (
+    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{text}</code>
+    //     </pre>
+    //   ),
+    // });
+
+    const audioRes = await fetch("/api/tts", {
+      method: "POST",
+      body: JSON.stringify(
+        {
+          text: text.toString(),
+        }
+      ),
+    });
+
+    const buffer = Buffer.from(await audioRes.arrayBuffer());
+    const blob = new Blob([buffer], { type: "audio/mp3" });
+    const audioURL = URL.createObjectURL(blob);
+    const audio = new Audio(audioURL);
+    audio.play();
   }
 
   let eventsList: CalendarEvent[] = [];
@@ -77,43 +120,88 @@ export default function Home() {
     setSearchResults(items);
   };
 
+  const newTime = (dateObject: Date, time: number, day: string) => {
+    let dateObj = new Date(dateObject);
+    dateObj.setMinutes(time % 100);
+    dateObj.setHours(Math.floor(time / 100));
+    dateObj.setMonth(parseInt(day.split('/')[0]));
+    dateObj.setDate(parseInt(day.split('/')[1]));
+    return dateObj;
+  };
+
+  const formatCountdownString = (timeDiff: number) => {
+    const seconds = timeDiff / 1000;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    return `${hours}H ${minutes}M`;
+  };
+
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const militaryTo12 = (time: number) => {
+    let string = '';
+    if (time % 100 < 10) {
+      string = `${Math.floor(time / 100) - 12 * +(Math.floor(time / 100) > 12)}:0${time % 100}`;
+    } else {
+      string = `${Math.floor(time / 100) - 12 * +(Math.floor(time / 100) > 12)}:${time % 100}`;
+    }
+
+    if (Math.floor(time / 100) >= 12) {
+      string += " PM";
+    } else {
+      string += " AM";
+    }
+
+    return string;
+  };
+
   return (
     <main className="flex min-h-screen max-h-screen max-w-screen">
-      <div className="h-screen w-20 sm:w-40 bg-primary"></div>
-      <div className="flex flex-col justify-content items-center mt-8 w-full">
-        <Input
-          className="w-[40vw] mb-2 border-primary border-2"
-          type="text"
-          placeholder="Search"
-          onChange={handleSearch}
-        />
-        <ScrollArea className="max-h-screen my-2 w-[40vw]">
-          <div className="flex flex-col gap-2 p-4 pt-0">
-            {searchResults.map((event: CalendarEvent) => (
-              <button
-                key={event.name}
-                className={cn(
-                  "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
-                )}
-              >
-                <div className="flex w-full flex-col gap-1">
-                  <div className="flex items-center">
-                    <div className="flex items-center gap-2">
-                      <div className="font-semibold">{event.name}</div>
-                    </div>
-                  </div>
-                  <div className="text-xs font-medium">
-                    {event.startTime + " - " + event.endTime}
-                  </div>
-                </div>
-                <div className="line-clamp-2 text-xs text-muted-foreground">
-                  {event.description}
-                </div>
-              </button>
-            ))}
-          </div>
-        </ScrollArea>
-        <div className="w-[40vw] pb-4 pt-2">
+      <div className="h-screen w-[50vw] bg-primary flex flex-col items-center">
+        <div className="w-[30vw] pb-4 pt-2">
+          <ScrollArea id="chat" className="w-[30vw] h-[80vh] bg-white rounded-lg my-4 p-4">
+            {chatHistory.map((datapoint, index) => {
+              const { role, content } = datapoint;
+              return (
+                <>
+                  {
+                    role === "user" ?
+                      <div className="text-sm flex items-centerf">
+                        <Avatar>
+                          <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                          <AvatarFallback>User</AvatarFallback>
+                        </Avatar>
+                        <span>{content}</span>
+                      </div> :
+                      <div className="text-sm flex items-center justify-center">
+                        <Avatar>
+                          <AvatarImage src="https://github.com/shadcn.png" alt="AI" />
+                          <AvatarFallback>AI</AvatarFallback>
+                        </Avatar>
+                        <Typewriter
+                          options={{
+                            delay: 10
+                          }}
+                          onInit={(typewriter) => {
+                            typewriter.typeString(content)
+                              .start();
+                          }}
+                        />
+                      </div>
+
+                  }
+                </>
+              );
+            })}
+          </ScrollArea>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
@@ -123,25 +211,64 @@ export default function Home() {
                   <FormItem>
                     <FormControl>
                       <Input
+                        autoComplete="off"
                         placeholder="Ask your AI assistant about your calendar."
-                        className="resize-none border-primary border-2 border-b-0 rounded-lg rounded-b-none"
+                        className="resize-none bg-white rounded-lg rounded-b-none"
                         {...field}
                       />
                     </FormControl>
                   </FormItem>
-                )}
-              />
-              <div className="flex justify-end w-full border-2 border-primary border-t-0 rounded-lg rounded-t-none p-2 gap-2">
+                )} />
+              <div className="flex justify-end w-full rounded-lg rounded-t-none p-2 gap-2 bg-white">
                 <Mic size={18} /> <ArrowBigRight size={18} />
               </div>
             </form>
           </Form>
         </div>
       </div>
+      <div className="flex flex-col justify-content items-center mt-8 w-full">
+        <Input
+          className="w-[40vw] mb-2 border-primary border-2"
+          type="text"
+          placeholder="Search"
+          onChange={handleSearch}
+        />
+        <ScrollArea className="max-h-screen my-2 w-[40vw]">
+          <div className="flex flex-col gap-2 p-4 pt-0">
+            {searchResults.map((event: CalendarEvent) => {
+              let currentTime = (time.getTime());
+              let eventDay = event.name.split("-=-")[1];
+              let nextTime = newTime(time, event.startTime, eventDay);
+              let countdownString = formatCountdownString(nextTime.getTime() - currentTime);
+              return (
+                <div
+                  className={cn(
+                    "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
+                  )}
+                >
+                  <div className="flex w-full flex-col gap-1">
+                    <div className="flex justify-between font-semibold">
+                      <span>{event.name.split("-=-")[0]}</span>
+                      <span>{countdownString}</span>
+                    </div>
+                    <div className="text-xs font-medium">
+                      {event.name.split("-=-")[1] + ": " + militaryTo12(event.startTime) + " - " + militaryTo12(event.endTime)}
+                    </div>
+                  </div>
+                  <div className="line-clamp-2 text-xs text-muted-foreground">
+                    {event.description}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </ScrollArea>
+
+      </div>
 
       {/*
           <ChatBox />
           */}
-    </main>
+    </main >
   );
-}
+};;

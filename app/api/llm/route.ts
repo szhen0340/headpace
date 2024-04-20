@@ -1,31 +1,37 @@
 import { NextRequest } from "next/server";
 import { OpenAI } from "openai";
 
-import { findOpenSlots, checkConflict } from "@/lib/find-open-slots";
+import { findOpenSlots, checkConflict, findEventsAtTime } from "@/lib/find-open-slots";
 
 import data from "@/data.json";
 
 const client = new OpenAI();
 
 export async function POST(req: NextRequest) {
-  const { prompt } = await req.json();
-  if (!prompt) {
+  const { history, prompt } = await req.json();
+  if (!prompt || !history) {
     return new Response(null, {
       status: 400,
-      statusText: "Did not include `prompt` parameter",
+      statusText: "Did not include correct parameters",
     });
   }
 
   const runner = client.beta.chat.completions.runTools({
-    model: "gpt-4-turbo-preview",
+    //model: "gpt-4-turbo-preview",
+    model: "gpt-3.5-turbo",
     messages: [
       {
         role: "system",
         content: `You are a helpful calendar assistant. You will use tool calls to answer the user's request.
 If the user wants to know all available time slots, call the findOpenSlots tool.
 If the user wants to check for a conflict or whether adding a new event is feasible, call the checkConflict tool.
-If available, list all time slots. Be friendly.`,
+If available, list all time slots. Be friendly.
+
+Today's date is ${new Date().toLocaleDateString()}.
+It is currently ${new Date().toLocaleTimeString()}.
+`,
       },
+      ...history,
       {
         role: "user",
         content: `Here is my list of events:\n${JSON.stringify(data)}`,
@@ -89,6 +95,30 @@ If available, list all time slots. Be friendly.`,
           },
         },
       },
+      {
+        type: "function",
+        function: {
+          function: findEventsAtTimeCall,
+          parse: JSON.parse,
+          description:
+            "Given a day name and time (military), finds all events that are scheduled at that time. Returns an array of events that are scheduled at that time.",
+          parameters: {
+            type: "object",
+            properties: {
+              day: {
+                description:
+                  "The name of the day the event is to be scheduled on.",
+                type: "string",
+              },
+              time: {
+                description:
+                  "The time wanted in military format. Military format is an integer of the form hhmm where hh is the hour and mm is the minute.",
+                type: "integer",
+              },
+            },
+          },
+        },
+      },
     ],
   });
   return new Response(JSON.stringify(await runner.finalContent()));
@@ -99,7 +129,8 @@ async function findOpenSlotsCall(args: {
   daySpecify: string;
 }) {
   const { duration, daySpecify } = args;
-  return findOpenSlots(duration, daySpecify === "" ? null : daySpecify);
+  const res = findOpenSlots(duration, daySpecify === "" ? null : daySpecify);
+  return res;
 }
 
 async function checkConflictCall(args: {
@@ -108,10 +139,17 @@ async function checkConflictCall(args: {
   end: number;
 }) {
   const { day, start, end } = args;
-  //console.log(day, start, end);
   return checkConflict({
     date: day,
     startTime: start,
     endTime: end,
   });
+}
+
+async function findEventsAtTimeCall(args: {
+  day: string;
+  time: number;
+}) {
+  const { day, time } = args;
+  return findEventsAtTime(day, time);
 }

@@ -52,7 +52,7 @@ export function findOpenSlots(duration: number, daySpecify: string | null) {
           openTimes.push({
             date: day.name,
             startTime: lastEvent,
-            endTime: event.endTime,
+            endTime: event.startTime,
           });
         }
       }
@@ -82,4 +82,20 @@ export function checkConflict(time: TimeSlot) {
   });
 
   return hasConflict;
+}
+
+export function findEventsAtTime(day: string, time: number) {
+  let events: CalendarEvent[] = [];
+
+  data.forEach((d: Day) => {
+    if (d.name === day) {
+      d.events.forEach((e: CalendarEvent) => {
+        if (e.startTime <= time && e.endTime >= time) {
+          events.push(e);
+        }
+      });
+    }
+  });
+
+  return events;
 }
