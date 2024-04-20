@@ -1,0 +1,121 @@
+[
+    {
+        "name": "04/21/2024",
+        "events": [
+            {
+                "name": "Morning Walk",
+                "description": "Enjoy a morning walk in the park",
+                "startTime": 900,
+                "endTime": 930
+            },
+            {
+                "name": "Code Review",
+                "description": "Review pull requests from the team",
+                "startTime": 1000,
+                "endTime": 1100
+            },
+            {
+                "name": "Web Development",
+                "description": "Work on new website features",
+                "startTime": 1130,
+                "endTime": 1300
+            },
+            {
+                "name": "Online Course",
+                "description": "Participate in an online course on UI/UX design",
+                "startTime": 1400,
+                "endTime": 1530
+            }
+        ]
+    },
+    {
+        "name": "04/22/2024",
+        "events": [
+            {
+                "name": "Project Meeting",
+                "description": "Team meeting to discuss project milestones",
+                "startTime": 900,
+                "endTime": 1000
+            },
+            {
+                "name": "Backend Development",
+                "description": "Continue developing API endpoints",
+                "startTime": 1030,
+                "endTime": 1230
+            },
+            {
+                "name": "Client Consultation",
+                "description": "Video call with client to review software requirements",
+                "startTime": 1500,
+                "endTime": 1600
+            }
+        ]
+    },
+    {
+        "name": "04/23/2024",
+        "events": [
+            {
+                "name": "Database Optimization",
+                "description": "Optimize SQL queries and database schemas",
+                "startTime": 930,
+                "endTime": 1100
+            },
+            {
+                "name": "Software Testing",
+                "description": "Run integration tests and fix bugs",
+                "startTime": 1400,
+                "endTime": 1600
+            }
+        ]
+    },
+    {
+        "name": "04/24/2024",
+        "events": [
+            {
+                "name": "Tech Workshop",
+                "description": "Attend a workshop on cloud infrastructure",
+                "startTime": 1000,
+                "endTime": 1200
+            }
+        ]
+    },
+    {
+        "name": "04/25/2024",
+        "events": [
+            {
+                "name": "Coding Marathon",
+                "description": "Participate in a day-long coding marathon to implement new features",
+                "startTime": 900,
+                "endTime": 1700
+            }
+        ]
+    },
+    {
+        "name": "04/26/2024",
+        "events": [
+            {
+                "name": "Team Outing",
+                "description": "Outdoor team-building activities",
+                "startTime": 1300,
+                "endTime": 1700
+            }
+        ]
+    },
+    {
+        "name": "04/27/2024",
+        "events": [
+            {
+                "name": "Reading and Research",
+                "description": "Spend time reading industry journals and researching emerging technologies",
+                "startTime": 1100,
+                "endTime": 1300
+            },
+            {
+                "name": "Open Source Contribution",
+                "description": "Contribute to an open-source project on GitHub",
+                "startTime": 1400,
+                "endTime": 1600
+            }
+        ]
+    }
+]

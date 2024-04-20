@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { OpenAI } from "openai";
 
 import { findOpenSlots, checkConflict, findEventsAtTime } from "@/lib/find-open-slots";
+import { findMultipleOpenSlots } from "@/lib/find-multiple-open-slots";
 import { insertEvent } from "@/lib/insert-event";
 import { getCalendarData } from "@/lib/get-calendar-data";
 
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const data = await getCalendarData();
+  const data = await getCalendarData("calendar1");
 
   if (!data) {
     return new Response(null, {
@@ -35,6 +36,11 @@ export async function POST(req: NextRequest) {
 If the user wants to know all available time slots, call the findOpenSlots tool.
 If the user wants to check for a conflict or whether adding a new event is feasible, call the checkConflict tool.
 If available, list all time slots. Be friendly.
+The day name should always be in the format mm/dd/yyyy.
+If the user requests to insert events to both calendars, call the setEvent tool twice for both calendars.
+
+The owner of the user, Sam, has database named 'calendar1'.
+His friend, Kevin, has a database named 'calendar2'.
 
 Today's date is ${new Date().toLocaleDateString()}.
 It is currently ${new Date().toLocaleTimeString()}.
@@ -71,6 +77,11 @@ It is currently ${new Date().toLocaleTimeString()}.
                   "The name of the day the event must be scheduled on. If no day is specified, then this argument should be empty string.",
                 type: "string",
               },
+              calendar: {
+                description:
+                  "The name of the calendar to be used. Use the appropriate database you desire, Sam uses 'calendar1', Kevin uses 'calendar2'.",
+                type: "string",
+              },
             },
           },
         },
@@ -100,6 +111,11 @@ It is currently ${new Date().toLocaleTimeString()}.
                   "The end time of the event in military format. Military format is an integer of the form hhmm where hh is the hour and mm is the minute.",
                 type: "integer",
               },
+              calendar: {
+                description:
+                  "The name of the calendar to be used. Use the appropriate database you desire, Sam uses 'calendar1', Kevin uses 'calendar2'.",
+                type: "string",
+              },
             },
           },
         },
@@ -123,6 +139,11 @@ It is currently ${new Date().toLocaleTimeString()}.
                 description:
                   "The time wanted in military format. Military format is an integer of the form hhmm where hh is the hour and mm is the minute.",
                 type: "integer",
+              },
+              calendar: {
+                description:
+                  "The name of the calendar to be used. Use the appropriate database you desire, Sam uses 'calendar1', Kevin uses 'calendar2'.",
+                type: "string",
               },
             },
           },
@@ -163,10 +184,39 @@ It is currently ${new Date().toLocaleTimeString()}.
                   "The name of the event to be scheduled.",
                 type: "string",
               },
+              calendar: {
+                description:
+                  "The name of the calendar to be used. Use the appropriate database you desire, Sam uses 'calendar1', Kevin uses 'calendar2'.",
+                type: "string",
+              },
             },
           },
         },
-      }
+      },
+      {
+        type: "function",
+        function: {
+          function: findMultipleOpenSlotsCall,
+          parse: JSON.parse,
+          description:
+            "Given a duration in minutes and a day name, find all time slots for which both Sam and Kevin are free. Returns an array of available time slots.",
+          parameters: {
+            type: "object",
+            properties: {
+              duration: {
+                description:
+                  "The duration in minutes of the event to be scheduled.",
+                type: "integer",
+              },
+              daySpecify: {
+                description:
+                  "The name of the day the event must be scheduled on. This must be a valid day.",
+                type: "string",
+              },
+            },
+          },
+        },
+      },
     ],
   });
   return new Response(JSON.stringify(await runner.finalContent()));
@@ -175,30 +225,36 @@ It is currently ${new Date().toLocaleTimeString()}.
 async function findOpenSlotsCall(args: {
   duration: number;
   daySpecify: string;
+  calendar: string;
 }) {
-  const { duration, daySpecify } = args;
-  return await findOpenSlots(duration, daySpecify === "" ? null : daySpecify);
+  const { duration, daySpecify, calendar } = args;
+  return await findOpenSlots(duration, daySpecify === "" ? null : daySpecify, calendar);
 }
 
 async function checkConflictCall(args: {
   day: string;
   start: number;
   end: number;
+  calendar: string;
 }) {
-  const { day, start, end } = args;
-  return await checkConflict({
-    date: day,
-    startTime: start,
-    endTime: end,
-  });
+  const { day, start, end, calendar } = args;
+  return await checkConflict(
+    {
+      date: day,
+      startTime: start,
+      endTime: end
+    },
+    calendar
+  );
 }
 
 async function findEventsAtTimeCall(args: {
   day: string;
   time: number;
+  calendar: string;
 }) {
-  const { day, time } = args;
-  return await findEventsAtTime(day, time);
+  const { day, time, calendar } = args;
+  return await findEventsAtTime(day, time, calendar);
 }
 
 async function setEventCall(args: {
@@ -207,7 +263,19 @@ async function setEventCall(args: {
   duration: number;
   description: string;
   name: string;
+  calendar: string;
 }) {
-  const { date, startTime, duration, description, name } = args;
-  return await insertEvent(date, startTime, duration, description, name);
+  const { date, startTime, duration, description, name, calendar } = args;
+  console.log(args);
+  return await insertEvent(date, startTime, duration, description, name, calendar);
+}
+
+async function findMultipleOpenSlotsCall(args: {
+  duration: number;
+  daySpecify: string;
+}) {
+  const { duration, daySpecify } = args;
+  let res = await findMultipleOpenSlots(duration, daySpecify);
+  console.log(res);
+  return res;
 }

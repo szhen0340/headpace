@@ -19,6 +19,8 @@ import Typewriter from "typewriter-effect";
 import { loadFirebase } from "@/lib/load-firestore";
 import { getCalendarData } from "@/lib/get-calendar-data";
 import { insertEvent } from "@/lib/insert-event";
+import { doc, onSnapshot } from "firebase/firestore";
+import { dbClient } from "@/lib/firebase-client";
 
 const FormSchema = z.object({
   input: z.string(),
@@ -98,8 +100,7 @@ export default function Home() {
     }, 1000);
 
     const getData = async () => {
-      //await insertEvent("04/21/2024", 1200, 40, "Meeting", "Team Meeting");
-      const calendarData = await getCalendarData();
+      const calendarData = await getCalendarData("calendar1");
       calendarData.forEach((day: Day) => {
         day.events.forEach((event: CalendarEvent) => {
           let newEvent = {
@@ -118,6 +119,25 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
+
+  if (false) {
+    onSnapshot(doc(dbClient, "calendars", "calendar1"), (snapshot) => {
+      // update eventsListRef
+      eventsListRef.current = [];
+      snapshot.data()?.days.forEach((day: Day) => {
+        day.events.forEach((event: CalendarEvent) => {
+          let newEvent = {
+            name: event.name + " -=- " + day.name,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            description: event.description,
+          };
+
+          eventsListRef.current.push(newEvent);
+        });
+      });
+    });
+  }
 
 
   useEffect(() => {

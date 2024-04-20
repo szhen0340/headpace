@@ -3,8 +3,8 @@
 import { dbClient } from "@/lib/firebase-client";
 import { doc, getDoc } from "firebase/firestore";
 
-export async function getCalendarData() {
-    const docRef = doc(dbClient, "calendars", "calendar1");
+export async function getCalendarData(calendar: string) {
+    const docRef = doc(dbClient, "calendars", calendar);
     const docSnap = await getDoc(docRef);
 
     let data = docSnap.data()?.days;

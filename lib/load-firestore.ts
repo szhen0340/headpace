@@ -1,7 +1,7 @@
 "use server";
 
 import { dbAdmin } from "@/lib/firebase-admin";
-import data from "@/data.json";
+import data from "@/data2.json";
 
 export async function loadFirebase() {
     let dayCollection: any[] = [];
@@ -13,7 +13,7 @@ export async function loadFirebase() {
         });
     });
 
-    dbAdmin.collection("calendars").doc("calendar1").set({
+    dbAdmin.collection("calendars").doc("calendar2").set({
         days: dayCollection,
     });
 }

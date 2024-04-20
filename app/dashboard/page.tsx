@@ -12,11 +12,17 @@ import { toast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-import data from "@/data.json";
 import Fuse from "fuse.js";
 import Typewriter from "typewriter-effect";
+import { loadFirebase } from "@/lib/load-firestore";
+import { getCalendarData } from "@/lib/get-calendar-data";
+import { insertEvent } from "@/lib/insert-event";
+import { doc, onSnapshot } from "firebase/firestore";
+import { dbClient } from "@/lib/firebase-client";
+
+import { findMultipleOpenSlots } from "@/lib/find-multiple-open-slots";
 
 const FormSchema = z.object({
   input: z.string(),
@@ -86,21 +92,62 @@ export default function Home() {
     audio.play();
   }
 
-  let eventsList: CalendarEvent[] = [];
-  data.forEach((day: Day) => {
-    day.events.forEach((event: CalendarEvent) => {
-      let newEvent = {
-        name: event.name + " -=- " + day.name,
-        startTime: event.startTime,
-        endTime: event.endTime,
-        description: event.description,
-      };
+  const eventsListRef = useRef<CalendarEvent[]>([]);
 
-      eventsList.push(newEvent);
+  //const [data, setData] = useState<any>([{}]);
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    const getData = async () => {
+      console.log(await findMultipleOpenSlots(30, '04/21/2024'));
+      const calendarData = await getCalendarData("calendar2");
+      calendarData.forEach((day: Day) => {
+        day.events.forEach((event: CalendarEvent) => {
+          let newEvent = {
+            name: event.name + " -=- " + day.name,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            description: event.description,
+          };
+
+          eventsListRef.current.push(newEvent);
+        });
+      });
+    };
+
+    getData();
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (false) {
+    onSnapshot(doc(dbClient, "calendars", "calendar1"), (snapshot) => {
+      // update eventsListRef
+      eventsListRef.current = [];
+      snapshot.data()?.days.forEach((day: Day) => {
+        day.events.forEach((event: CalendarEvent) => {
+          let newEvent = {
+            name: event.name + " -=- " + day.name,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            description: event.description,
+          };
+
+          eventsListRef.current.push(newEvent);
+        });
+      });
     });
-  });
+  }
 
-  const [searchResults, setSearchResults] = useState(eventsList);
+
+  useEffect(() => {
+    setSearchResults(eventsListRef.current);
+  }, []);
+
+  const [searchResults, setSearchResults] = useState(eventsListRef.current);
   const options = {
     includeMatches: true,
     ignoreLocation: true,
@@ -108,13 +155,13 @@ export default function Home() {
     findAllMatches: true,
     keys: ["name", "startTime", "endTime", "description"],
   };
-  const fuse = new Fuse(eventsList, options);
+  const fuse = new Fuse(eventsListRef.current, options);
 
   const handleSearch = (event: any) => {
     const { value } = event.target;
 
     if (value.length === 0) {
-      setSearchResults(eventsList);
+      setSearchResults(eventsListRef.current);
       return;
     }
 
@@ -142,15 +189,6 @@ export default function Home() {
 
     return `${days}D ${hours}H ${minutes}M`;
   };
-
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const militaryTo12 = (time: number) => {
     let string = '';
@@ -193,7 +231,15 @@ export default function Home() {
                             delay: 10
                           }}
                           onInit={(typewriter) => {
-                            typewriter.typeString(content)
+                            typewriter.typeString(
+                              content
+                                .replaceAll("\n", "<br/>")
+                                .replaceAll("  ", "&nbsp;&nbsp;")
+                                // regex for **...**
+                                .replaceAll(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                                // regex for *...*
+                                .replaceAll(/\*(.*?)\*/g, "<em>$1</em>")
+                            )
                               .start();
                           }}
                         />
@@ -225,7 +271,6 @@ export default function Home() {
                     </FormControl>
                   </FormItem>
                 )} />
-
 
               <div className="flex justify-end w-full rounded-lg rounded-t-none p-2 gap-2 bg-white">
                 <Button variant="ghost" className="size-6 p-0 m-0">
@@ -285,10 +330,6 @@ export default function Home() {
         </ScrollArea>
 
       </div>
-
-      {/*
-          <ChatBox />
-          */}
     </main >
   );
 };;

@@ -13,12 +13,12 @@ function militaryToMinutes(military: number) {
 }
 
 // duration: minutes
-export async function findOpenSlots(duration: number, daySpecify: string | null) {
+export async function findOpenSlots(duration: number, daySpecify: string | null, calendar: string) {
   let openTimes: TimeSlot[] = [];
   const wakeUpTime = 900;
   const bedTime = 2200;
 
-  const data = (await getCalendarData());
+  const data = (await getCalendarData(calendar));
   if (data) {
     data.forEach((day: Day) => {
       // if there aren't any events scheduled at 9 AM, schedule an event
@@ -67,10 +67,10 @@ export async function findOpenSlots(duration: number, daySpecify: string | null)
   return openTimes;
 }
 
-export async function checkConflict(time: TimeSlot) {
+export async function checkConflict(time: TimeSlot, calendar: string) {
   let hasConflict = false;
 
-  const data = await getCalendarData();
+  const data = await getCalendarData(calendar);
   if (data) {
     data.forEach((day: Day) => {
       if (day.name === time.date) {
@@ -91,10 +91,10 @@ export async function checkConflict(time: TimeSlot) {
   return hasConflict;
 }
 
-export async function findEventsAtTime(day: string, time: number) {
+export async function findEventsAtTime(day: string, time: number, calendar: string) {
   let events: CalendarEvent[] = [];
 
-  const data = await getCalendarData();
+  const data = await getCalendarData(calendar);
   if (data) {
     data?.forEach((d: Day) => {
       if (d.name === day) {
