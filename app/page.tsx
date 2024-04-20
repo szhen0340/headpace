@@ -28,9 +28,9 @@ export default function IndexPage() {
             time management today.
           </p>
           <div className="flex gap-4 text-lg font-bold">
-            <Button className="h-12 w-36">
-              <Link href="/login">Login</Link>
-            </Button>
+            <Link href="/login">
+              <Button className="h-12 w-36">Login</Button>
+            </Link>
             <Button className="h-12 w-36" variant="outline">
               Learn more
             </Button>
