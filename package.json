@@ -19,6 +19,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "dotenv": "^16.4.5",
+    "embla-carousel-autoplay": "^8.0.2",
+    "embla-carousel-react": "^8.0.2",
     "firebase": "^10.11.0",
     "firebase-admin": "^12.1.0",
     "fuse.js": "^7.0.0",

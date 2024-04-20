@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { OpenAI } from "openai";
 
 import { findOpenSlots, checkConflict, findEventsAtTime } from "@/lib/find-open-slots";
-
-import data from "@/data.json";
+import { insertEvent } from "@/lib/insert-event";
+import { getCalendarData } from "@/lib/get-calendar-data";
 
 const client = new OpenAI();
 
@@ -13,6 +13,15 @@ export async function POST(req: NextRequest) {
     return new Response(null, {
       status: 400,
       statusText: "Did not include correct parameters",
+    });
+  }
+
+  const data = await getCalendarData();
+
+  if (!data) {
+    return new Response(null, {
+      status: 500,
+      statusText: "Failed to get calendar data",
     });
   }
 
@@ -119,6 +128,45 @@ It is currently ${new Date().toLocaleTimeString()}.
           },
         },
       },
+      {
+        type: "function",
+        function: {
+          function: setEventCall,
+          parse: JSON.parse,
+          description:
+            "Given a day name, start time (military), duration in minutes, description, and name, sets an event in the user's calendar. Before using, check for conflicts for the time slot. Returns `true` if the event was successfully set, otherwise `false` if the event could not be set.",
+          parameters: {
+            type: "object",
+            properties: {
+              date: {
+                description:
+                  "The name of the day the event is to be scheduled on.",
+                type: "string",
+              },
+              startTime: {
+                description:
+                  "The start time of the event in military format. Military format is an integer of the form hhmm where hh is the hour and mm is the minute.",
+                type: "integer",
+              },
+              duration: {
+                description:
+                  "The duration in minutes of the event to be scheduled.",
+                type: "integer",
+              },
+              description: {
+                description:
+                  "The description of the event to be scheduled. If the user doesn't specify, summarize for them.",
+                type: "string",
+              },
+              name: {
+                description:
+                  "The name of the event to be scheduled.",
+                type: "string",
+              },
+            },
+          },
+        },
+      }
     ],
   });
   return new Response(JSON.stringify(await runner.finalContent()));
@@ -129,8 +177,7 @@ async function findOpenSlotsCall(args: {
   daySpecify: string;
 }) {
   const { duration, daySpecify } = args;
-  const res = findOpenSlots(duration, daySpecify === "" ? null : daySpecify);
-  return res;
+  return await findOpenSlots(duration, daySpecify === "" ? null : daySpecify);
 }
 
 async function checkConflictCall(args: {
@@ -139,7 +186,7 @@ async function checkConflictCall(args: {
   end: number;
 }) {
   const { day, start, end } = args;
-  return checkConflict({
+  return await checkConflict({
     date: day,
     startTime: start,
     endTime: end,
@@ -151,5 +198,16 @@ async function findEventsAtTimeCall(args: {
   time: number;
 }) {
   const { day, time } = args;
-  return findEventsAtTime(day, time);
+  return await findEventsAtTime(day, time);
+}
+
+async function setEventCall(args: {
+  date: string;
+  startTime: number;
+  duration: number;
+  description: string;
+  name: string;
+}) {
+  const { date, startTime, duration, description, name } = args;
+  return await insertEvent(date, startTime, duration, description, name);
 }

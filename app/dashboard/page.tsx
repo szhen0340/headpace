@@ -35,8 +35,11 @@ export default function Home() {
   useEffect(() => { }, [chatHistory]);
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    form.reset();
     const prompt = data.input;
+    if (prompt.trim().length === 0) {
+      return;
+    }
+    form.reset();
 
     chatHistory.push({
       role: "user",
@@ -224,8 +227,10 @@ export default function Home() {
                 )} />
 
 
-              <Mic size={18} />
               <div className="flex justify-end w-full rounded-lg rounded-t-none p-2 gap-2 bg-white">
+                <Button variant="ghost" className="size-6 p-0 m-0">
+                  <Mic size={18} />
+                </Button>
                 <Button type="submit" variant="ghost" className="size-6 p-0 m-0">
                   <ArrowBigRight size={18} />
                 </Button>
