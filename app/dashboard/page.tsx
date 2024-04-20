@@ -215,7 +215,7 @@ export default function Home() {
             {chatHistory.map((datapoint, index) => {
               const { role, content } = datapoint;
               return (
-                <>
+                <div key={index}>
                   {
                     role === "user" ?
                       <div className="text-sm flex items-center gap-2 my-4">
@@ -250,7 +250,7 @@ export default function Home() {
                       </div>
 
                   }
-                </>
+                </div>
               );
             })}
           </ScrollArea>
@@ -293,7 +293,7 @@ export default function Home() {
         />
         <ScrollArea className="max-h-screen my-2 w-[40vw]">
           <div className="flex flex-col gap-2 p-4 pt-0">
-            {searchResults.map((event: CalendarEvent) => {
+            {searchResults.map((event: CalendarEvent, index) => {
               let currentTime = (time.getTime());
               let eventDay = event.name.split("-=-")[1];
               // parse eventDay from mm/dd/yyyy to Date object
@@ -307,6 +307,7 @@ export default function Home() {
               let countdownString = formatCountdownString(nextTime.getTime() - currentTime);
               return (
                 <div
+                  key={index}
                   className={cn(
                     "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent" + (dayDiff % 2 == 0 ? " bg-slate-100" : "")
                   )}

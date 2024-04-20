@@ -55,7 +55,7 @@ export default function IndexPage() {
                                     onInit={(typewriter) => {
                                         typewriter.typeString(
                                             `Tomorrow, you and your client are both free during the following time slots for at least 15 minutes:
-                                            from 12:30 PM to 2:00 PM and from 5:30 PM to 6:00 PM\nFeel free to pick any of these slots for planning your event!`)
+                                            From 12:30 PM to 2:00 PM and from 5:30 PM to 6:00 PM. Feel free to pick any of these slots for planning your event!`)
                                             .start();
                                     }}
                                 />
