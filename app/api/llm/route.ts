@@ -6,7 +6,7 @@ import { findMultipleOpenSlots } from "@/lib/find-multiple-open-slots";
 import { insertEvent } from "@/lib/insert-event";
 import { getCalendarData } from "@/lib/get-calendar-data";
 
-const client = new OpenAI();
+const client = (process.env.NO_AI?.toString().trim() != "true") ? new OpenAI() : undefined as unknown as OpenAI;
 
 export async function POST(req: NextRequest) {
   const { history, prompt } = await req.json();
@@ -15,6 +15,15 @@ export async function POST(req: NextRequest) {
       status: 400,
       statusText: "Did not include correct parameters",
     });
+  }
+
+  if (process.env.NO_AI?.toString().trim() == "true") {
+    // reject with boilerplate message
+    return new Response(
+      JSON.stringify(
+        "Sorry, the AI feature is disabled. Please deploy locally to use the AI feature with your own API Keys."
+      ),
+    );
   }
 
   const data = await getCalendarData("calendar1");
