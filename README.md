@@ -2,17 +2,27 @@
 
 # Headpace
 
+<p align="center">
+  <img src="https://img.shields.io/badge/ChatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/next%20js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white" />
+</p>
+
 Transform your productivity. Designed to streamline your schedule, manage appointments, and keep you on track. Experience the future of time management today.
 
 Headpace is a natural-language AI-driven calendar assistant to boost your productivity and solve scheduling conflicts.
 
-Headpace is the **1st place** project winner at the 2024 HSHacks 12-hour Hackathon hosted by John Hersey High School.
+Headpace is the **1st place** [project](https://devpost.com/software/headpace) winner at the 2024 [HSHacks](https://hshacks.org/) 12-hour Hackathon hosted by John Hersey High School.
 
 ## Usage
 
-A preview of the website is deployed at https://headpace.vercel.app/. However, it is recommended that you pull the source code and deploy the website yourself with your API keys for the full features. Directly opening a Github Codespace and typing `npm run dev` or `npm run build` works.
+A preview of the website is deployed on [Vercel](https://headpace.vercel.app/). However, it is recommended that you pull the source code and deploy the website yourself with your API keys for the full features. Directly opening a Github Codespace and typing `npm run dev` or `npm run build` works.
 
 Have a `.env` file. It should include `OPENAI_API_KEY=your_key` and `NO_AI=false`. The AI is disabled on the hosted website for security purposes.
+
+A commentary-free recording of a previous version of the product is also available on our [Devpost page](https://devpost.com/software/headpace).
 
 ## Inspiration
 
