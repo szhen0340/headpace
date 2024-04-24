@@ -22,7 +22,7 @@ Headpace is the **1st place** [project](https://devpost.com/software/headpace) w
 
 A preview of the website is deployed on [Vercel](https://headpace.vercel.app/). However, it is recommended that you pull the source code and deploy the website yourself with your API keys for the full features. Directly opening a Github Codespace and typing `npm run dev` or `npm run build` works.
 
-Have a `.env` file. It should include `OPENAI_API_KEY=your_key` and `NO_AI=false`. The AI is disabled on the hosted website for security purposes. It should also include `PROJECT_ID=your_firebase_project_id`, `CLIENT_EMAIL=your_firebase_service_account_email`, and `PRIVATE_KEY=your_firebase_service_account_key`. The database is not available on the repository for security purposes.
+Have a `.env` file. It should include `OPENAI_API_KEY=your_key` and `NO_AI=false`. The AI is disabled on the hosted website for security purposes.
 
 A commentary-free recording of a previous version of the product is also available on our [Devpost page](https://devpost.com/software/headpace).
 
