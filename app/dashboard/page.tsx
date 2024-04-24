@@ -16,7 +16,6 @@ import { useState, useEffect, useRef } from "react";
 
 import Fuse from "fuse.js";
 import Typewriter from "typewriter-effect";
-import { loadFirebase } from "@/lib/load-firestore";
 import { getCalendarData } from "@/lib/get-calendar-data";
 import { insertEvent } from "@/lib/insert-event";
 import { doc, onSnapshot } from "firebase/firestore";
