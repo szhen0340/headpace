@@ -12,7 +12,7 @@
 
 # Headpace
 
-Transform your productivity. Designed to streamline your schedule, manage appointments, and keep you on track. Experience the future of time management today.
+Transform your productivity. Designed to streamline your schedule, manage appointments, and keep you on track. Experience the future of time management today!
 
 Headpace is a natural-language AI-driven calendar assistant to boost your productivity and solve scheduling conflicts.
 
