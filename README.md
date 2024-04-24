@@ -36,7 +36,7 @@ The user can use our integrated AI-assistant powered by GPT-4 to ask for availab
 
 ## How we built it
 
-We used React for front end with shadcn/ui componenets, next.js. For backend we used the OpenAI API for the LLM and Firestore for the database.
+We used Next.js and shadcn/ui's component library for the frontend. For backend we used the OpenAI API for the LLM and Firestore for the database.
 
 We utilize GPT-4's function-calling feature, which allows GPT-4 to seamlessly interact with our backend algorithms that detects conflicts and finds available time slots.
 
