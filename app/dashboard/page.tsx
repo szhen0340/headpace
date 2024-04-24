@@ -255,7 +255,7 @@ export default function Home() {
                         }}
                       />
                       <Avatar>
-                        <AvatarImage src="/" alt="AI" />
+                        <AvatarImage src="/headspace.png" alt="AI" />
                         <AvatarFallback>AI</AvatarFallback>
                       </Avatar>
                     </div>

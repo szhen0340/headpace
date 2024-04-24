@@ -18,19 +18,14 @@ export default function LoginForm() {
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            For the purposes of a demo, this login form is not functional.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
+              <Input id="email" type="email" required />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
@@ -47,7 +42,7 @@ export default function LoginForm() {
 
             <Link href="/test">
               <Button type="submit" className="w-full">
-                Login
+                Press me to continue
               </Button>
             </Link>
 

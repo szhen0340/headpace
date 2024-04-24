@@ -15,7 +15,7 @@ export default function IndexPage() {
   return (
     <main className="w-screen h-screen p-8">
       <div className="flex p-8 ml-24">
-        <Image src="/headspace_text.png" alt="" width={200} height={40} />
+        <Image src="/headspace_text.svg" alt="" width={200} height={40} />
       </div>
       <div className="flex">
         <div className="flex max-w-[700px] flex-col items-start gap-2 p-8 ml-24 mt-16">
@@ -60,7 +60,6 @@ export default function IndexPage() {
                   options={{
                     delay: 10,
                     autoStart: true,
-                    loop: true,
                   }}
                   onInit={(typewriter) => {
                     typewriter
@@ -72,7 +71,7 @@ export default function IndexPage() {
                   }}
                 />
                 <Avatar>
-                  <AvatarImage src="/" alt="User" />
+                  <AvatarImage src="/headspace.png" alt="User" />
                   <AvatarFallback>AI</AvatarFallback>
                 </Avatar>
               </div>
